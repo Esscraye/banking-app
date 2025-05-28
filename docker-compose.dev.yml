@@ -1,0 +1,40 @@
+services:
+  # Base de données MySQL pour développement
+  mysql-dev:
+    image: mysql:8.0
+    container_name: banking-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: banking_dev
+      MYSQL_USER: banking_user
+      MYSQL_PASSWORD: banking_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - banking-dev-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis pour les sessions de développement
+  redis-dev:
+    image: redis:7-alpine
+    container_name: banking-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - banking-dev-network
+
+volumes:
+  mysql_dev_data:
+    driver: local
+
+networks:
+  banking-dev-network:
+    driver: bridge

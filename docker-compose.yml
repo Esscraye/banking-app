@@ -1,0 +1,160 @@
+services:
+  # Base de données MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: banking-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: banking_db
+      MYSQL_USER: banking_user
+      MYSQL_PASSWORD: banking_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Service d'authentification
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: ../docker/auth.Dockerfile
+    container_name: banking-auth
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      - DATABASE_URL=mysql://banking_user:banking_password@mysql:3306/banking_db
+      - JWT_SECRET=your-super-secret-jwt-key
+      - PORT=8082
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      timeout: 10s
+      retries: 5
+
+  # Service de gestion des comptes
+  accounts-service:
+    build:
+      context: ./backend
+      dockerfile: ../docker/accounts.Dockerfile
+    container_name: banking-accounts
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=mysql://banking_user:banking_password@mysql:3306/banking_db
+      - JWT_SECRET=your-super-secret-jwt-key
+      - PORT=8080
+      - AUTH_SERVICE_URL=http://auth-service:8082
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      timeout: 10s
+      retries: 5
+
+  # Service de transactions
+  transactions-service:
+    build:
+      context: ./backend
+      dockerfile: ../docker/transactions.Dockerfile
+    container_name: banking-transactions
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=mysql://banking_user:banking_password@mysql:3306/banking_db
+      - JWT_SECRET=your-super-secret-jwt-key
+      - PORT=8081
+      - AUTH_SERVICE_URL=http://auth-service:8082
+      - ACCOUNTS_SERVICE_URL=http://accounts-service:8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      accounts-service:
+        condition: service_healthy
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      timeout: 10s
+      retries: 5
+
+  # Service de notifications
+  notifications-service:
+    build:
+      context: ./backend
+      dockerfile: ../docker/notifications.Dockerfile
+    container_name: banking-notifications
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      - DATABASE_URL=mysql://banking_user:banking_password@mysql:3306/banking_db
+      - JWT_SECRET=your-super-secret-jwt-key
+      - PORT=8083
+      - AUTH_SERVICE_URL=http://auth-service:8082
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      timeout: 10s
+      retries: 5
+
+  # Frontend Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend.Dockerfile
+    container_name: banking-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_AUTH_URL=http://localhost:8082
+      - NEXT_PUBLIC_TRANSACTIONS_URL=http://localhost:8081
+      - NEXT_PUBLIC_NOTIFICATIONS_URL=http://localhost:8083
+    depends_on:
+      - auth-service
+      - accounts-service
+      - transactions-service
+      - notifications-service
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  banking-network:
+    driver: bridge
