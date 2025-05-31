@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"banking-app/shared/models"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -20,17 +21,17 @@ var DB *gorm.DB
 func parseDatabaseURL(databaseURL string) string {
 	// Remove mysql:// prefix
 	url := strings.TrimPrefix(databaseURL, "mysql://")
-	
+
 	// Split into credentials and host parts
 	parts := strings.Split(url, "@")
 	if len(parts) != 2 {
 		log.Printf("Invalid DATABASE_URL format: %s", databaseURL)
 		return ""
 	}
-	
+
 	credentials := parts[0]
 	hostAndDB := parts[1]
-	
+
 	// Extract user and password
 	userPass := strings.Split(credentials, ":")
 	if len(userPass) != 2 {
@@ -39,7 +40,7 @@ func parseDatabaseURL(databaseURL string) string {
 	}
 	user := userPass[0]
 	password := userPass[1]
-	
+
 	// Extract host, port, and database
 	hostPortDB := strings.Split(hostAndDB, "/")
 	if len(hostPortDB) != 2 {
@@ -48,18 +49,18 @@ func parseDatabaseURL(databaseURL string) string {
 	}
 	hostPort := hostPortDB[0]
 	database := hostPortDB[1]
-	
+
 	// Build MySQL DSN
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		user, password, hostPort, database)
-	
+
 	return dsn
 }
 
 // ConnectDatabase établit la connexion à la base de données MySQL
 func ConnectDatabase() error {
 	var dsn string
-	
+
 	// Try DATABASE_URL first (Docker environment)
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL != "" {

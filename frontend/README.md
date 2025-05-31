@@ -1,36 +1,142 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Banking Application Frontend
 
-## Getting Started
+Interface utilisateur de l'application bancaire construite avec [Next.js](https://nextjs.org) et TypeScript. Ce frontend communique avec une architecture microservices backend pour fournir une expérience bancaire complète.
 
-First, run the development server:
+## Architecture
+
+Cette application frontend fait partie d'un système bancaire distribué composé de :
+
+- **Frontend** (Next.js) - Interface utilisateur (port 3000)
+- **Auth Service** - Authentification et autorisation (port 8082)
+- **Accounts Service** - Gestion des comptes bancaires (port 8080)
+- **Transactions Service** - Traitement des transactions (port 8081)
+- **Notifications Service** - Gestion des notifications (port 8083)
+
+## Fonctionnalités
+
+- 🔐 Authentification sécurisée avec JWT
+- 💰 Gestion des comptes bancaires
+- 💸 Historique et traitement des transactions
+- 🔔 Notifications en temps réel
+- 📱 Interface responsive et moderne
+- 🛡️ Validation côté client et serveur
+
+## Prérequis
+
+- Node.js 18+ 
+- npm/yarn/pnpm
+- Backend microservices en cours d'exécution
+
+## Installation et Configuration
+
+1. **Installation des dépendances**
+```bash
+npm install
+# ou
+yarn install
+```
+
+2. **Configuration de l'environnement**
+```bash
+cp .env.example .env.local
+```
+
+Configurer les variables d'environnement :
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8080
+NEXT_PUBLIC_AUTH_URL=http://localhost:8082
+NEXT_PUBLIC_TRANSACTIONS_URL=http://localhost:8081
+NEXT_PUBLIC_NOTIFICATIONS_URL=http://localhost:8083
+```
+
+## Démarrage
+
+### Développement
 
 ```bash
 npm run dev
-# or
+# ou
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+L'application sera disponible sur [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+### Avec Docker
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Depuis la racine du projet
+docker-compose up frontend
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Structure du Projet
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+frontend/
+├── app/                    # Pages et layouts Next.js 13+
+├── components/             # Composants React réutilisables
+├── lib/                    # Utilitaires et configurations
+├── public/                 # Assets statiques
+├── styles/                 # Styles CSS/SCSS
+└── types/                  # Définitions TypeScript
+```
 
-## Deploy on Vercel
+## API Integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Le frontend communique avec les microservices via des appels REST :
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Authentification** : JWT tokens stockés en localStorage
+- **Gestion d'état** : React Context + useState/useEffect
+- **Validation** : Zod schemas pour la validation des formulaires
+- **Styling** : Tailwind CSS pour un design moderne
+
+## Scripts Disponibles
+
+```bash
+npm run dev          # Démarrage en mode développement
+npm run build        # Build de production
+npm run start        # Démarrage en mode production
+npm run lint         # Linting du code
+npm run type-check   # Vérification TypeScript
+```
+
+## Tests
+
+```bash
+npm run test         # Tests unitaires
+npm run test:e2e     # Tests end-to-end
+npm run test:watch   # Tests en mode watch
+```
+
+## Déploiement
+
+### Avec Docker Compose (Recommandé)
+
+```bash
+# Depuis la racine du projet
+make up              # Démarre tous les services
+make down            # Arrête tous les services
+```
+
+### Manuel
+
+```bash
+npm run build
+npm start
+```
+
+## Technologies Utilisées
+
+- **Framework** : Next.js 14
+- **Language** : TypeScript
+- **Styling** : Tailwind CSS
+- **Validation** : Zod
+- **HTTP Client** : Fetch API
+- **State Management** : React Context
+- **Testing** : Jest + Testing Library

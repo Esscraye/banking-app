@@ -1,39 +1,47 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { authService } from '@/lib/services';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { authService } from "@/lib/services";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const response = await authService.login(formData);
-      
+
       // Store token in localStorage (in a real app, consider more secure storage)
-      localStorage.setItem('auth_token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      
+      localStorage.setItem("auth_token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
       // Redirect to dashboard
-      router.push('/');
+      router.push("/");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Login failed. Please try again.');
+      setError(
+        error.response?.data?.message || "Login failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -54,7 +62,7 @@ export default function LoginPage() {
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            Or{" "}
             <Link
               href="/register"
               className="font-medium text-blue-600 hover:text-blue-500"
@@ -123,12 +131,8 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? 'Signing in...' : 'Sign in'}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign in"}
                 </Button>
               </div>
             </form>

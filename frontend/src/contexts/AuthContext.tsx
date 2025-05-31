@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '@/lib/services';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { authService } from "@/lib/services";
 
 interface User {
   id: number;
@@ -10,6 +10,8 @@ interface User {
   last_name: string;
   phone?: string;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface RegisterData {
@@ -35,20 +37,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check for existing auth on mount
-    const storedToken = localStorage.getItem('auth_token');
-    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem("auth_token");
+    const storedUser = localStorage.getItem("user");
 
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -64,9 +68,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setToken(newToken);
       setUser(userData);
-      
-      localStorage.setItem('auth_token', newToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+
+      localStorage.setItem("auth_token", newToken);
+      localStorage.setItem("user", JSON.stringify(userData));
     } catch (error) {
       throw error;
     }
@@ -79,9 +83,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setToken(newToken);
       setUser(newUser);
-      
-      localStorage.setItem('auth_token', newToken);
-      localStorage.setItem('user', JSON.stringify(newUser));
+
+      localStorage.setItem("auth_token", newToken);
+      localStorage.setItem("user", JSON.stringify(newUser));
     } catch (error) {
       throw error;
     }
@@ -90,16 +94,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user");
   };
 
   const updateProfile = async (data: Partial<User>) => {
     try {
       const updatedUser = await authService.updateProfile(data);
-      
+
       setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (error) {
       throw error;
     }

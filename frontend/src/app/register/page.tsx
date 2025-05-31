@@ -1,34 +1,40 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { authService } from '@/lib/services';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { authService } from "@/lib/services";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    first_name: '',
-    last_name: '',
-    phone: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
+    first_name: "",
+    last_name: "",
+    phone: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
@@ -42,16 +48,19 @@ export default function RegisterPage() {
         phone: formData.phone,
       };
       const response = await authService.register(registerData);
-      
+
       // Store token in localStorage
-      localStorage.setItem('auth_token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      
+      localStorage.setItem("auth_token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
       // Redirect to dashboard
-      router.push('/');
+      router.push("/");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      setError(
+        error.response?.data?.message ||
+          "Registration failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -72,7 +81,7 @@ export default function RegisterPage() {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            Or{" "}
             <Link
               href="/login"
               className="font-medium text-blue-600 hover:text-blue-500"
@@ -193,12 +202,8 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? 'Creating account...' : 'Create account'}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Creating account..." : "Create account"}
                 </Button>
               </div>
             </form>

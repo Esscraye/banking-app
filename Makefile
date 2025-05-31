@@ -3,7 +3,6 @@
 
 # Variables
 DOCKER_COMPOSE = docker-compose
-DOCKER_COMPOSE_DEV = docker-compose -f docker-compose.dev.yml
 GO_FILES = $(shell find backend -name "*.go")
 FRONTEND_DIR = frontend
 BACKEND_DIR = backend
@@ -21,15 +20,8 @@ install: ## Installe toutes les dépendances
 
 # Développement
 dev: ## Lance l'environnement de développement
-	@echo "🚀 Démarrage de l'environnement de développement..."
-	$(DOCKER_COMPOSE_DEV) up -d
-	@echo "✅ Base de données démarrée"
-	@echo "🔗 MySQL accessible sur localhost:3307"
-	@echo "🔗 Redis accessible sur localhost:6379"
-
-dev-full: ## Lance l'application complète en mode développement
 	@echo "🚀 Démarrage de l'application complète..."
-	$(DOCKER_COMPOSE) up --build
+	$(DOCKER_COMPOSE) up --build -d
 
 # Tests
 test: test-backend test-frontend ## Lance tous les tests
@@ -58,11 +50,11 @@ build-frontend: ## Build le frontend
 # Docker
 docker-build: ## Build toutes les images Docker
 	@echo "🐳 Build des images Docker..."
-	docker build -f docker/auth.Dockerfile -t banking-app-auth .
-	docker build -f docker/accounts.Dockerfile -t banking-app-accounts .
-	docker build -f docker/transactions.Dockerfile -t banking-app-transactions .
-	docker build -f docker/notifications.Dockerfile -t banking-app-notifications .
-	docker build -f docker/frontend.Dockerfile -t banking-app-frontend .
+	docker build -f docker/auth.Dockerfile -t banking-app-auth ./backend
+	docker build -f docker/accounts.Dockerfile -t banking-app-accounts ./backend
+	docker build -f docker/transactions.Dockerfile -t banking-app-transactions ./backend
+	docker build -f docker/notifications.Dockerfile -t banking-app-notifications ./backend
+	docker build -f docker/frontend.Dockerfile -t banking-app-frontend ./frontend
 
 docker-up: ## Lance tous les services avec Docker Compose
 	@echo "🐳 Démarrage des services..."
@@ -77,7 +69,6 @@ docker-up: ## Lance tous les services avec Docker Compose
 docker-down: ## Arrête tous les services Docker
 	@echo "🛑 Arrêt des services..."
 	$(DOCKER_COMPOSE) down
-	$(DOCKER_COMPOSE_DEV) down
 
 docker-logs: ## Affiche les logs des services
 	$(DOCKER_COMPOSE) logs -f
@@ -112,7 +103,7 @@ format: format-backend format-frontend ## Formate tout le code
 format-backend: ## Formate le code backend
 	@echo "✨ Formatage du backend..."
 	@cd $(BACKEND_DIR) && go fmt ./...
-	@cd $(BACKEND_DIR) && goimports -w .
+	@cd $(BACKEND_DIR) && $(shell go env GOPATH)/bin/goimports -w .
 
 format-frontend: ## Formate le code frontend
 	@echo "✨ Formatage du frontend..."

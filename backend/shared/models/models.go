@@ -2,6 +2,7 @@ package models
 
 import (
 	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -17,7 +18,7 @@ type User struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	
+
 	// Relations
 	Accounts []Account `json:"accounts,omitempty" gorm:"foreignKey:UserID"`
 }
@@ -34,7 +35,7 @@ type Account struct {
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"-" gorm:"index"`
-	
+
 	// Relations
 	User         User          `json:"user,omitempty" gorm:"foreignKey:UserID"`
 	Transactions []Transaction `json:"transactions,omitempty" gorm:"foreignKey:AccountID"`
@@ -42,22 +43,22 @@ type Account struct {
 
 // Transaction représente une transaction bancaire
 type Transaction struct {
-	ID              uint           `json:"id" gorm:"primaryKey;type:bigint unsigned"`
-	AccountID       uint           `json:"account_id" gorm:"type:bigint unsigned;not null"`
-	Type            string         `json:"type" gorm:"not null"` // debit, credit, transfer
-	Amount          float64        `json:"amount" gorm:"type:decimal(15,2);not null"`
-	Currency        string         `json:"currency" gorm:"default:'EUR'"`
-	Description     string         `json:"description"`
-	Reference       string         `json:"reference" gorm:"type:varchar(100);uniqueIndex"`
-	Status          string         `json:"status" gorm:"default:'pending'"` // pending, completed, failed, cancelled
-	ProcessedAt     *time.Time     `json:"processed_at"`
-	CreatedAt       time.Time      `json:"created_at"`
-	UpdatedAt       time.Time      `json:"updated_at"`
-	DeletedAt       gorm.DeletedAt `json:"-" gorm:"index"`
-	
+	ID          uint           `json:"id" gorm:"primaryKey;type:bigint unsigned"`
+	AccountID   uint           `json:"account_id" gorm:"type:bigint unsigned;not null"`
+	Type        string         `json:"type" gorm:"not null"` // debit, credit, transfer
+	Amount      float64        `json:"amount" gorm:"type:decimal(15,2);not null"`
+	Currency    string         `json:"currency" gorm:"default:'EUR'"`
+	Description string         `json:"description"`
+	Reference   string         `json:"reference" gorm:"type:varchar(100);uniqueIndex"`
+	Status      string         `json:"status" gorm:"default:'pending'"` // pending, completed, failed, cancelled
+	ProcessedAt *time.Time     `json:"processed_at"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+
 	// Pour les transferts
-	ToAccountID     *uint          `json:"to_account_id" gorm:"type:bigint unsigned"`
-	
+	ToAccountID *uint `json:"to_account_id" gorm:"type:bigint unsigned"`
+
 	// Relations
 	Account   Account  `json:"account,omitempty" gorm:"foreignKey:AccountID"`
 	ToAccount *Account `json:"to_account,omitempty" gorm:"foreignKey:ToAccountID"`
@@ -75,7 +76,7 @@ type Notification struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	
+
 	// Relations
 	User User `json:"user,omitempty" gorm:"foreignKey:UserID"`
 }

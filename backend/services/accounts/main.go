@@ -39,7 +39,7 @@ func main() {
 	// Health check endpoint (no auth required)
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "healthy",
+			"status":  "healthy",
 			"service": "accounts",
 		})
 	})

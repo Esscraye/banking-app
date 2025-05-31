@@ -38,7 +38,7 @@ func main() {
 	// Health check endpoint (no auth required)
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "healthy",
+			"status":  "healthy",
 			"service": "notifications",
 		})
 	})
@@ -165,10 +165,10 @@ func createNotificationHandler(c *gin.Context) {
 	go func() {
 		// Dans un vrai système, ici on enverrait la notification via le service approprié
 		// (service email, SMS, push notification, etc.)
-		
+
 		// Pour la simulation, on attend un peu puis on marque comme envoyée
 		//time.Sleep(2 * time.Second)
-		
+
 		//now := time.Now()
 		//database.GetDB().Model(&notification).Updates(models.Notification{
 		//	Status: "sent",
