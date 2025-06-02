@@ -161,9 +161,9 @@ describe("Dashboard", () => {
     });
 
     // Vérifier que les informations du compte sont affichées
-    expect(screen.getByText("Account #1")).toBeInTheDocument();
+    expect(screen.getByText("checking Account")).toBeInTheDocument();
 
-    // Chercher le type de compte de manière plus flexible
-    expect(screen.getByText(/checking.*account/i)).toBeInTheDocument();
+    // Vérifier que le numéro de compte est affiché
+    expect(screen.getByText("ACC001234567890")).toBeInTheDocument();
   });
 });

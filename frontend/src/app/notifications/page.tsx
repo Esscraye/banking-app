@@ -147,17 +147,17 @@ export default function NotificationsPage() {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-4xl mx-auto">
-          <Skeleton className="h-8 w-48 mb-6" />
+          <Skeleton className="h-8 w-48 mb-6" data-testid="skeleton" />
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
               <Card key={i}>
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">
-                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-10 w-10 rounded-full" data-testid="skeleton" />
                     <div className="flex-1">
-                      <Skeleton className="h-4 w-[200px]" />
-                      <Skeleton className="h-3 w-[300px] mt-2" />
-                      <Skeleton className="h-3 w-[150px] mt-2" />
+                      <Skeleton className="h-4 w-[200px]" data-testid="skeleton" />
+                      <Skeleton className="h-3 w-[300px] mt-2" data-testid="skeleton" />
+                      <Skeleton className="h-3 w-[150px] mt-2" data-testid="skeleton" />
                     </div>
                   </div>
                 </CardContent>
@@ -273,11 +273,12 @@ export default function NotificationsPage() {
                   />
                 </div>
                 <div className="flex space-x-2">
-                  <Button type="submit">Create Notification</Button>
+                  <Button type="submit" data-testid="submit-notification">Create Notification</Button>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setShowCreateForm(false)}
+                    data-testid="cancel-notification"
                   >
                     Cancel
                   </Button>

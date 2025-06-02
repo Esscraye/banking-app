@@ -19,12 +19,18 @@ body {
 }
 
 /* Force tous les éléments en mode clair */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   color-scheme: light !important;
 }
 
 /* Assure que les inputs et autres éléments natifs respectent le mode clair */
-input, textarea, select, button, option {
+input,
+textarea,
+select,
+button,
+option {
   color-scheme: light !important;
   background-color: white;
   color: black;

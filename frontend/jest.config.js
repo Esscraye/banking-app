@@ -27,6 +27,6 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   transformIgnorePatterns: [
-    'node_modules/(?!(lucide-react)/)',
+    'node_modules/(?!(lucide-react|class-variance-authority|clsx|tailwind-merge)/)',
   ],
 };
