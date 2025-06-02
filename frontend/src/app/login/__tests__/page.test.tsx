@@ -33,7 +33,12 @@ describe("LoginPage", () => {
     jest.clearAllMocks();
     mockUseRouter.mockReturnValue({
       push: mockPush,
-    } as any); // TODO: Replace any with a more specific type if possible
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    });
   });
 
   it("renders login form correctly", () => {

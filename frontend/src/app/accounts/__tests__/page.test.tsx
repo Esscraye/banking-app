@@ -1,7 +1,11 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import AccountsPage from "../page";
-import { accountsService, transactionsService, type Account } from "@/lib/services";
+import {
+  accountsService,
+  transactionsService,
+  type Account,
+} from "@/lib/services";
 
 // Mock services
 jest.mock("@/lib/services", () => ({

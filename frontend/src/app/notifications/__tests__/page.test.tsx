@@ -1,7 +1,40 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { notificationsService, Notification } from "@/lib/services";
 import NotificationsPage from "../page";
+
+// Define types for mocked components
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: string;
+  size?: string;
+  type?: "button" | "submit" | "reset";
+  [key: string]: unknown;
+}
+
+interface InputProps {
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  required?: boolean;
+  [key: string]: unknown;
+}
+
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface LinkProps {
+  children: React.ReactNode;
+  href: string;
+}
+
+interface SkeletonProps {
+  className?: string;
+  [key: string]: unknown;
+}
 
 // Mock the notifications service
 jest.mock("@/lib/services", () => ({
@@ -15,15 +48,28 @@ jest.mock("@/lib/services", () => ({
 
 // Mock UI components
 jest.mock("@/components/ui/button", () => ({
-  Button: ({ children, onClick, variant, size, type, ...props }: any) => (
-    <button onClick={onClick} data-variant={variant} data-size={size} type={type} {...props}>
+  Button: ({
+    children,
+    onClick,
+    variant,
+    size,
+    type,
+    ...props
+  }: ButtonProps) => (
+    <button
+      onClick={onClick}
+      data-variant={variant}
+      data-size={size}
+      type={type}
+      {...props}
+    >
       {children}
     </button>
   ),
 }));
 
 jest.mock("@/components/ui/input", () => ({
-  Input: ({ value, onChange, placeholder, required, ...props }: any) => (
+  Input: ({ value, onChange, placeholder, required, ...props }: InputProps) => (
     <input
       value={value}
       onChange={onChange}
@@ -35,57 +81,79 @@ jest.mock("@/components/ui/input", () => ({
 }));
 
 jest.mock("@/components/ui/card", () => ({
-  Card: ({ children, className }: any) => (
+  Card: ({ children, className }: CardProps) => (
     <div className={className} data-testid="card">
       {children}
     </div>
   ),
-  CardContent: ({ children, className }: any) => (
+  CardContent: ({ children, className }: CardProps) => (
     <div className={className} data-testid="card-content">
       {children}
     </div>
   ),
-  CardDescription: ({ children }: any) => (
+  CardDescription: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="card-description">{children}</div>
   ),
-  CardHeader: ({ children }: any) => (
+  CardHeader: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="card-header">{children}</div>
   ),
-  CardTitle: ({ children }: any) => (
+  CardTitle: ({ children }: { children: React.ReactNode }) => (
     <h2 data-testid="card-title">{children}</h2>
   ),
 }));
 
 jest.mock("@/components/ui/skeleton", () => ({
-  Skeleton: ({ className, ...props }: any) => (
+  Skeleton: ({ className, ...props }: SkeletonProps) => (
     <div className={className} data-testid="skeleton" {...props} />
   ),
 }));
 
 // Mock lucide-react icons
-jest.mock("lucide-react", () => ({
-  ArrowLeft: () => <div data-testid="arrow-left-icon">ArrowLeft</div>,
-  Plus: () => <div data-testid="plus-icon">Plus</div>,
-  Bell: () => <div data-testid="bell-icon">Bell</div>,
-  Mail: () => <div data-testid="mail-icon">Mail</div>,
-  MessageSquare: () => <div data-testid="message-square-icon">MessageSquare</div>,
-  Smartphone: () => <div data-testid="smartphone-icon">Smartphone</div>,
-  Check: () => <div data-testid="check-icon">Check</div>,
-  Trash: () => <div data-testid="trash-icon">Trash</div>,
-}));
+jest.mock("lucide-react", () => {
+  const ArrowLeft = () => <div data-testid="arrow-left-icon">ArrowLeft</div>;
+  ArrowLeft.displayName = "ArrowLeft";
+  const Plus = () => <div data-testid="plus-icon">Plus</div>;
+  Plus.displayName = "Plus";
+  const Bell = () => <div data-testid="bell-icon">Bell</div>;
+  Bell.displayName = "Bell";
+  const Mail = () => <div data-testid="mail-icon">Mail</div>;
+  Mail.displayName = "Mail";
+  const MessageSquare = () => (
+    <div data-testid="message-square-icon">MessageSquare</div>
+  );
+  MessageSquare.displayName = "MessageSquare";
+  const Smartphone = () => <div data-testid="smartphone-icon">Smartphone</div>;
+  Smartphone.displayName = "Smartphone";
+  const Check = () => <div data-testid="check-icon">Check</div>;
+  Check.displayName = "Check";
+  const Trash = () => <div data-testid="trash-icon">Trash</div>;
+  Trash.displayName = "Trash";
+  return {
+    ArrowLeft,
+    Plus,
+    Bell,
+    Mail,
+    MessageSquare,
+    Smartphone,
+    Check,
+    Trash,
+  };
+});
 
 // Mock Next.js Link
 jest.mock("next/link", () => {
-  return ({ children, href }: any) => (
+  const MockLink = ({ children, href }: LinkProps) => (
     <a href={href} data-testid="next-link">
       {children}
     </a>
   );
+  MockLink.displayName = "MockLink";
+  return MockLink;
 });
 
 // Mock utilities
 jest.mock("@/lib/utils", () => ({
-  cn: (...args: any[]) => args.filter(Boolean).join(" "),
+  cn: (...args: string[]) => args.filter(Boolean).join(" "),
 }));
 
 // Mock class-variance-authority
@@ -177,7 +245,11 @@ describe("NotificationsPage", () => {
     render(<NotificationsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("No notifications found. Create your first notification!")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "No notifications found. Create your first notification!",
+        ),
+      ).toBeInTheDocument();
     });
   });
 
@@ -189,7 +261,9 @@ describe("NotificationsPage", () => {
     render(<NotificationsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Failed to load notifications")).toBeInTheDocument();
+      expect(
+        screen.getByText("Failed to load notifications"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -199,15 +273,23 @@ describe("NotificationsPage", () => {
     render(<NotificationsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("No notifications found. Create your first notification!")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "No notifications found. Create your first notification!",
+        ),
+      ).toBeInTheDocument();
     });
 
     const newNotificationButton = screen.getByText("New Notification");
     fireEvent.click(newNotificationButton);
 
     expect(screen.getByText("Create New Notification")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Notification title")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Notification message")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Notification title"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Notification message"),
+    ).toBeInTheDocument();
   });
 
   it("creates a new notification successfully", async () => {
@@ -226,12 +308,18 @@ describe("NotificationsPage", () => {
     (notificationsService.getNotifications as jest.Mock)
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([newNotification]);
-    (notificationsService.createNotification as jest.Mock).mockResolvedValue(newNotification);
+    (notificationsService.createNotification as jest.Mock).mockResolvedValue(
+      newNotification,
+    );
 
     render(<NotificationsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("No notifications found. Create your first notification!")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "No notifications found. Create your first notification!",
+        ),
+      ).toBeInTheDocument();
     });
 
     // Click new notification button
@@ -241,7 +329,7 @@ describe("NotificationsPage", () => {
     // Fill out the form
     const titleInput = screen.getByPlaceholderText("Notification title");
     const messageTextarea = screen.getByPlaceholderText("Notification message");
-    
+
     fireEvent.change(titleInput, { target: { value: "Test Notification" } });
     fireEvent.change(messageTextarea, { target: { value: "Test message" } });
 
@@ -260,8 +348,12 @@ describe("NotificationsPage", () => {
 
   it("marks notification as read", async () => {
     const updatedNotification = { ...mockNotifications[0], is_read: true };
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
-    (notificationsService.markAsRead as jest.Mock).mockResolvedValue(updatedNotification);
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
+    (notificationsService.markAsRead as jest.Mock).mockResolvedValue(
+      updatedNotification,
+    );
 
     render(<NotificationsPage />);
 
@@ -279,8 +371,12 @@ describe("NotificationsPage", () => {
   });
 
   it("deletes notification after confirmation", async () => {
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
-    (notificationsService.deleteNotification as jest.Mock).mockResolvedValue({});
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
+    (notificationsService.deleteNotification as jest.Mock).mockResolvedValue(
+      {},
+    );
 
     // Mock window.confirm
     const originalConfirm = window.confirm;
@@ -305,7 +401,9 @@ describe("NotificationsPage", () => {
   });
 
   it("cancels deletion when user declines confirmation", async () => {
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
 
     // Mock window.confirm to return false
     const originalConfirm = window.confirm;
@@ -328,7 +426,9 @@ describe("NotificationsPage", () => {
   });
 
   it("displays correct notification icons based on type", async () => {
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
 
     render(<NotificationsPage />);
 
@@ -340,7 +440,9 @@ describe("NotificationsPage", () => {
   });
 
   it("displays notification statistics", async () => {
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
 
     render(<NotificationsPage />);
 
@@ -351,7 +453,7 @@ describe("NotificationsPage", () => {
       const unreadSection = screen.getByText("Unread").closest("div");
       const sentSection = screen.getByText("Sent").closest("div");
       const pendingSection = screen.getByText("Pending").closest("div");
-      
+
       expect(totalSection).toHaveTextContent("3");
       expect(unreadSection).toHaveTextContent("2");
       expect(sentSection).toHaveTextContent("1");
@@ -365,7 +467,11 @@ describe("NotificationsPage", () => {
     render(<NotificationsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("No notifications found. Create your first notification!")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "No notifications found. Create your first notification!",
+        ),
+      ).toBeInTheDocument();
     });
 
     // Open create form
@@ -378,7 +484,9 @@ describe("NotificationsPage", () => {
     const cancelButton = screen.getByText("Cancel");
     fireEvent.click(cancelButton);
 
-    expect(screen.queryByText("Create New Notification")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Create New Notification"),
+    ).not.toBeInTheDocument();
   });
 
   it("handles different notification types in the form", async () => {
@@ -387,7 +495,11 @@ describe("NotificationsPage", () => {
     render(<NotificationsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("No notifications found. Create your first notification!")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "No notifications found. Create your first notification!",
+        ),
+      ).toBeInTheDocument();
     });
 
     // Open create form
@@ -402,7 +514,9 @@ describe("NotificationsPage", () => {
   });
 
   it("displays notification timestamps correctly", async () => {
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
 
     render(<NotificationsPage />);
 
@@ -413,7 +527,9 @@ describe("NotificationsPage", () => {
   });
 
   it("displays different status badges correctly", async () => {
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
 
     render(<NotificationsPage />);
 
@@ -433,7 +549,11 @@ describe("NotificationsPage", () => {
     render(<NotificationsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("No notifications found. Create your first notification!")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "No notifications found. Create your first notification!",
+        ),
+      ).toBeInTheDocument();
     });
 
     // Open create form and submit
@@ -442,7 +562,7 @@ describe("NotificationsPage", () => {
 
     const titleInput = screen.getByPlaceholderText("Notification title");
     const messageTextarea = screen.getByPlaceholderText("Notification message");
-    
+
     fireEvent.change(titleInput, { target: { value: "Test" } });
     fireEvent.change(messageTextarea, { target: { value: "Test message" } });
 
@@ -450,12 +570,16 @@ describe("NotificationsPage", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Failed to create notification")).toBeInTheDocument();
+      expect(
+        screen.getByText("Failed to create notification"),
+      ).toBeInTheDocument();
     });
   });
 
   it("handles mark as read error", async () => {
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
     (notificationsService.markAsRead as jest.Mock).mockRejectedValue(
       new Error("Mark as read failed"),
     );
@@ -471,12 +595,16 @@ describe("NotificationsPage", () => {
     fireEvent.click(markAsReadButtons[0].closest("button")!);
 
     await waitFor(() => {
-      expect(screen.getByText("Failed to mark notification as read")).toBeInTheDocument();
+      expect(
+        screen.getByText("Failed to mark notification as read"),
+      ).toBeInTheDocument();
     });
   });
 
   it("handles delete notification error", async () => {
-    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(mockNotifications);
+    (notificationsService.getNotifications as jest.Mock).mockResolvedValue(
+      mockNotifications,
+    );
     (notificationsService.deleteNotification as jest.Mock).mockRejectedValue(
       new Error("Delete failed"),
     );
@@ -496,7 +624,9 @@ describe("NotificationsPage", () => {
     fireEvent.click(deleteButtons[0].closest("button")!);
 
     await waitFor(() => {
-      expect(screen.getByText("Failed to delete notification")).toBeInTheDocument();
+      expect(
+        screen.getByText("Failed to delete notification"),
+      ).toBeInTheDocument();
     });
 
     // Restore original confirm

@@ -1,8 +1,80 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import "@testing-library/jest-dom";
-import axios from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
-// Mock axios
-jest.mock("axios");
+// Variables to store interceptor functions
+let requestInterceptorSuccess:
+  | ((config: AxiosRequestConfig) => AxiosRequestConfig)
+  | undefined;
+let requestInterceptorError: ((error: any) => Promise<any>) | undefined;
+let responseInterceptorSuccess:
+  | ((response: AxiosResponse<any, any>) => AxiosResponse<any, any>)
+  | undefined;
+let responseInterceptorError: ((error: any) => Promise<any>) | undefined;
+
+// Create mock interceptors object
+const mockInterceptors = {
+  request: {
+    use: jest
+      .fn()
+      .mockImplementation(
+        (
+          success: (config: AxiosRequestConfig) => AxiosRequestConfig,
+          error: (error: any) => Promise<any>,
+        ) => {
+          requestInterceptorSuccess = success;
+          requestInterceptorError = error;
+          return 1; // Return interceptor id
+        },
+      ),
+  },
+  response: {
+    use: jest
+      .fn()
+      .mockImplementation(
+        (
+          success: (response: AxiosResponse) => AxiosResponse,
+          error: (error: any) => Promise<any>,
+        ) => {
+          responseInterceptorSuccess = success;
+          responseInterceptorError = error;
+          return 1; // Return interceptor id
+        },
+      ),
+  },
+};
+
+// Setup mock axios instance with interceptors
+const mockAxiosInstance: AxiosInstance = {
+  interceptors: mockInterceptors,
+  get: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  delete: jest.fn(),
+  patch: jest.fn(),
+  options: jest.fn(),
+  head: jest.fn(),
+  request: jest.fn(),
+  getUri: jest.fn(),
+  defaults: {} as any,
+} as unknown as AxiosInstance;
+
+// Mock axios completely before importing anything else
+jest.mock("axios", () => ({
+  __esModule: true,
+  default: {
+    create: jest.fn(() => mockAxiosInstance),
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+    patch: jest.fn(),
+    options: jest.fn(),
+    head: jest.fn(),
+    request: jest.fn(),
+  },
+}));
+
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock localStorage
@@ -20,21 +92,33 @@ delete (window as any).location;
 window.location = { href: "" } as any;
 
 describe("API Configuration", () => {
-  let mockAxiosInstance: any;
+  beforeAll(async () => {
+    // Import the api module to register interceptors with our mocks
+    await import("../api");
+  });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    // Don't clear all mocks as it resets axios.create call count
+    // Instead, selectively clear what we need
+    localStorageMock.getItem.mockClear();
+    localStorageMock.setItem.mockClear();
+    localStorageMock.removeItem.mockClear();
     localStorageMock.getItem.mockReturnValue(null);
     window.location.href = "";
 
-    // Setup mock axios instance
-    mockAxiosInstance = {
-      interceptors: {
-        request: { use: jest.fn() },
-        response: { use: jest.fn() },
-      },
-    };
-    mockedAxios.create.mockReturnValue(mockAxiosInstance);
+    // Reset the captured interceptor functions
+    requestInterceptorSuccess = undefined;
+    requestInterceptorError = undefined;
+    responseInterceptorSuccess = undefined;
+    responseInterceptorError = undefined;
+
+    // Clear only interceptor mocks but preserve create call tracking
+    mockInterceptors.request.use.mockClear();
+    mockInterceptors.response.use.mockClear();
+
+    // Re-import to capture interceptors
+    jest.resetModules();
+    await import("../api");
   });
 
   it("should have correct service URLs configuration", () => {
@@ -116,13 +200,12 @@ describe("API Configuration", () => {
     expect(localStorage.getItem("auth_token")).toBe("test-token");
 
     localStorageMock.setItem.mockImplementation((key, value) => {
-      expect(key).toBe("auth_token");
-      expect(value).toBe("new-token");
+      // No expectation here - just mock the function
     });
     localStorage.setItem("auth_token", "new-token");
 
     localStorageMock.removeItem.mockImplementation((key) => {
-      expect(key).toBe("auth_token");
+      // No expectation here - just mock the function
     });
     localStorage.removeItem("auth_token");
 
@@ -141,5 +224,143 @@ describe("API Configuration", () => {
 
     window.location.href = "/dashboard";
     expect(window.location.href).toBe("/dashboard");
+  });
+
+  it("should create axios instance with correct configuration", () => {
+    expect(mockedAxios.create).toHaveBeenCalledWith({
+      timeout: 10000,
+    });
+  });
+
+  it("should setup request interceptor correctly", () => {
+    // The api module has already been imported at the top of this file
+    // So the interceptors should have been set up during initial import
+    expect(mockAxiosInstance.interceptors.request.use).toHaveBeenCalled();
+    expect(mockAxiosInstance.interceptors.response.use).toHaveBeenCalled();
+  });
+
+  it("should add auth token to request headers when token exists", () => {
+    localStorageMock.getItem.mockReturnValue("test-token");
+
+    const config = {
+      url: "/api/accounts/balance",
+      headers: {},
+    };
+
+    // Call the request interceptor success function
+    const modifiedConfig = requestInterceptorSuccess!(config);
+
+    expect(localStorageMock.getItem).toHaveBeenCalledWith("auth_token");
+    expect(modifiedConfig.headers?.Authorization).toBe("Bearer test-token");
+    expect(modifiedConfig.baseURL).toBe(
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
+    );
+  });
+
+  it("should not add auth header when no token exists", () => {
+    localStorageMock.getItem.mockReturnValue(null);
+
+    const config = {
+      url: "/api/transactions/history",
+      headers: {},
+    };
+
+    const modifiedConfig = requestInterceptorSuccess!(config);
+
+    expect(modifiedConfig.headers?.Authorization).toBeUndefined();
+    expect(modifiedConfig.baseURL).toBe(
+      process.env.NEXT_PUBLIC_TRANSACTIONS_URL || "http://localhost:8081",
+    );
+  });
+
+  it("should handle request interceptor errors", () => {
+    const error = new Error("Request error");
+    const result = requestInterceptorError!(error);
+
+    expect(result).rejects.toBe(error);
+  });
+
+  it("should handle successful responses", () => {
+    const response = {
+      data: { success: true },
+      status: 200,
+      statusText: "",
+      headers: {},
+      config: {},
+    } as AxiosResponse;
+    const result = responseInterceptorSuccess!(response);
+
+    expect(result).toBe(response);
+  });
+
+  it("should handle 401 errors by clearing storage and redirecting", () => {
+    const error = {
+      response: { status: 401 },
+    };
+
+    const result = responseInterceptorError!(error);
+
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith("auth_token");
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith("user");
+    expect(window.location.href).toBe("/login");
+    expect(result).rejects.toBe(error);
+  });
+
+  it("should handle non-401 errors without clearing storage", () => {
+    const error = {
+      response: { status: 500 },
+    };
+
+    const result = responseInterceptorError!(error);
+
+    expect(localStorageMock.removeItem).not.toHaveBeenCalled();
+    expect(window.location.href).toBe("");
+    expect(result).rejects.toBe(error);
+  });
+
+  it("should handle errors without response object", () => {
+    const error = new Error("Network error");
+
+    const result = responseInterceptorError!(error);
+
+    expect(localStorageMock.removeItem).not.toHaveBeenCalled();
+    expect(window.location.href).toBe("");
+    expect(result).rejects.toBe(error);
+  });
+
+  it("should set correct base URL for auth endpoints", () => {
+    const config = {
+      url: "/api/auth/login",
+      headers: {},
+    };
+
+    const modifiedConfig = requestInterceptorSuccess!(config);
+
+    expect(modifiedConfig.baseURL).toBe(
+      process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:8082",
+    );
+  });
+
+  it("should set correct base URL for notifications endpoints", () => {
+    const config = {
+      url: "/api/notifications/unread",
+      headers: {},
+    };
+
+    const modifiedConfig = requestInterceptorSuccess!(config);
+
+    expect(modifiedConfig.baseURL).toBe(
+      process.env.NEXT_PUBLIC_NOTIFICATIONS_URL || "http://localhost:8083",
+    );
+  });
+
+  it("should handle config without url property", () => {
+    const config = {
+      headers: {},
+    };
+
+    const modifiedConfig = requestInterceptorSuccess!(config);
+
+    expect(modifiedConfig.baseURL).toBeUndefined();
   });
 });

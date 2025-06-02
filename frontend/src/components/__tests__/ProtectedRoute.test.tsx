@@ -23,7 +23,12 @@ describe("ProtectedRoute", () => {
     jest.clearAllMocks();
     mockUseRouter.mockReturnValue({
       push: mockPush,
-    } as any);
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    });
   });
 
   it("shows loading spinner when isLoading is true", () => {

@@ -17,10 +17,16 @@ jest.mock("@/lib/services", () => ({
 }));
 
 // Mock Next.js Link component
-jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  );
+jest.mock("next/link", () => {
+  const MockLink = ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>;
+  MockLink.displayName = "MockLink";
+  return MockLink;
 });
 
 const mockUser = {
@@ -83,8 +89,12 @@ describe("ProfilePage", () => {
       expect(screen.getByText("1")).toBeInTheDocument(); // User ID
       expect(screen.getByText("Active")).toBeInTheDocument(); // Account status
       // Check dates with flexible matching since toLocaleDateString() format may vary
-      expect(screen.getByText(/01\/01\/2024|1\/1\/2024|1\/1\/24|Jan.*1.*2024/)).toBeInTheDocument(); // Member since
-      expect(screen.getByText(/15\/01\/2024|1\/15\/2024|15\/1\/24|Jan.*15.*2024/)).toBeInTheDocument(); // Last updated
+      expect(
+        screen.getByText(/01\/01\/2024|1\/1\/2024|1\/1\/24|Jan.*1.*2024/),
+      ).toBeInTheDocument(); // Member since
+      expect(
+        screen.getByText(/15\/01\/2024|1\/15\/2024|15\/1\/24|Jan.*15.*2024/),
+      ).toBeInTheDocument(); // Last updated
     });
 
     it("shows email field as disabled", () => {
@@ -242,7 +252,9 @@ describe("ProfilePage", () => {
       expect(screen.getByText("Current Password *")).toBeInTheDocument();
       expect(screen.getByText("New Password *")).toBeInTheDocument();
       expect(screen.getByText("Confirm New Password *")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /Change Password/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /Change Password/i }),
+      ).toBeInTheDocument();
       expect(screen.getByText("Minimum 6 characters")).toBeInTheDocument();
     });
 
@@ -283,7 +295,9 @@ describe("ProfilePage", () => {
         target: { value: "differentpassword" },
       });
 
-      const changeButton = screen.getByRole("button", { name: /Change Password/i });
+      const changeButton = screen.getByRole("button", {
+        name: /Change Password/i,
+      });
       fireEvent.click(changeButton);
 
       await waitFor(() => {
@@ -308,7 +322,9 @@ describe("ProfilePage", () => {
         target: { value: "short" },
       });
 
-      const changeButton = screen.getByRole("button", { name: /Change Password/i });
+      const changeButton = screen.getByRole("button", {
+        name: /Change Password/i,
+      });
       fireEvent.click(changeButton);
 
       await waitFor(() => {
@@ -321,7 +337,7 @@ describe("ProfilePage", () => {
     });
 
     it("submits password change with correct data", async () => {
-      jest.mocked(authService.changePassword).mockResolvedValue({} as any);
+      jest.mocked(authService.changePassword).mockResolvedValue(undefined);
 
       render(<ProfilePage />);
 
@@ -335,7 +351,9 @@ describe("ProfilePage", () => {
         target: { value: "newpassword123" },
       });
 
-      const changeButton = screen.getByRole("button", { name: /Change Password/i });
+      const changeButton = screen.getByRole("button", {
+        name: /Change Password/i,
+      });
       fireEvent.click(changeButton);
 
       await waitFor(() => {
@@ -347,7 +365,7 @@ describe("ProfilePage", () => {
     });
 
     it("shows success message after successful password change", async () => {
-      jest.mocked(authService.changePassword).mockResolvedValue({} as any);
+      jest.mocked(authService.changePassword).mockResolvedValue(undefined);
 
       render(<ProfilePage />);
 
@@ -361,7 +379,9 @@ describe("ProfilePage", () => {
         target: { value: "newpassword123" },
       });
 
-      const changeButton = screen.getByRole("button", { name: /Change Password/i });
+      const changeButton = screen.getByRole("button", {
+        name: /Change Password/i,
+      });
       fireEvent.click(changeButton);
 
       await waitFor(() => {
@@ -372,7 +392,7 @@ describe("ProfilePage", () => {
     });
 
     it("clears password form after successful change", async () => {
-      jest.mocked(authService.changePassword).mockResolvedValue({} as any);
+      jest.mocked(authService.changePassword).mockResolvedValue(undefined);
 
       render(<ProfilePage />);
 
@@ -392,7 +412,9 @@ describe("ProfilePage", () => {
         target: { value: "newpassword123" },
       });
 
-      const changeButton = screen.getByRole("button", { name: /Change Password/i });
+      const changeButton = screen.getByRole("button", {
+        name: /Change Password/i,
+      });
       fireEvent.click(changeButton);
 
       await waitFor(() => {
@@ -420,7 +442,9 @@ describe("ProfilePage", () => {
         target: { value: "newpassword123" },
       });
 
-      const changeButton = screen.getByRole("button", { name: /Change Password/i });
+      const changeButton = screen.getByRole("button", {
+        name: /Change Password/i,
+      });
       fireEvent.click(changeButton);
 
       await waitFor(() => {
@@ -445,7 +469,9 @@ describe("ProfilePage", () => {
         target: { value: "newpassword123" },
       });
 
-      const changeButton = screen.getByRole("button", { name: /Change Password/i });
+      const changeButton = screen.getByRole("button", {
+        name: /Change Password/i,
+      });
       fireEvent.click(changeButton);
 
       await waitFor(() => {
@@ -474,7 +500,9 @@ describe("ProfilePage", () => {
         target: { value: "newpassword123" },
       });
 
-      const changeButton = screen.getByRole("button", { name: /Change Password/i });
+      const changeButton = screen.getByRole("button", {
+        name: /Change Password/i,
+      });
       fireEvent.click(changeButton);
 
       // Check loading state
@@ -482,7 +510,9 @@ describe("ProfilePage", () => {
       expect(changeButton).toBeDisabled();
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Change Password/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: /Change Password/i }),
+        ).toBeInTheDocument();
       });
     });
   });

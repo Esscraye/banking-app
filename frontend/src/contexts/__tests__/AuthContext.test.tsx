@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { waitFor, act } from "@testing-library/react";
 import { renderHook } from "@testing-library/react";
 import React from "react";
 import { AuthProvider, useAuth } from "../AuthContext";
@@ -23,7 +23,7 @@ Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
-const { authService } = require("@/lib/services");
+import { authService } from "@/lib/services";
 
 describe("AuthContext", () => {
   beforeEach(() => {

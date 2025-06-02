@@ -1,6 +1,11 @@
 import "@testing-library/jest-dom";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import Dashboard from "../Dashboard";
+import {
+  accountsService,
+  transactionsService,
+  notificationsService,
+} from "@/lib/services";
 
 // Mock AuthContext
 jest.mock("@/contexts/AuthContext", () => ({
@@ -81,6 +86,16 @@ jest.mock("@/lib/services", () => ({
     ),
   },
 }));
+
+const mockedAccountsService = accountsService as jest.Mocked<
+  typeof accountsService
+>;
+const mockedTransactionsService = transactionsService as jest.Mocked<
+  typeof transactionsService
+>;
+const mockedNotificationsService = notificationsService as jest.Mocked<
+  typeof notificationsService
+>;
 
 describe("Dashboard", () => {
   beforeEach(() => {
@@ -165,5 +180,78 @@ describe("Dashboard", () => {
 
     // Vérifier que le numéro de compte est affiché
     expect(screen.getByText("ACC001234567890")).toBeInTheDocument();
+  });
+
+  it("handles API errors gracefully", async () => {
+    // Mock services to throw errors
+    mockedAccountsService.getAccounts.mockRejectedValue(new Error("API Error"));
+    mockedTransactionsService.getTransactions.mockRejectedValue(
+      new Error("API Error"),
+    );
+    mockedNotificationsService.getNotifications.mockRejectedValue(
+      new Error("API Error"),
+    );
+
+    await act(async () => {
+      render(<Dashboard />);
+    });
+
+    // Wait for error handling
+    await waitFor(() => {
+      expect(screen.getByText("Banking Dashboard")).toBeInTheDocument();
+    });
+
+    // The component should still render even with errors
+    expect(screen.getByText("Welcome, John Doe")).toBeInTheDocument();
+  });
+
+  it("handles createAccount successfully", async () => {
+    await act(async () => {
+      render(<Dashboard />);
+    });
+
+    // Wait for initial load
+    await waitFor(() => {
+      expect(screen.getByText("New Account")).toBeInTheDocument();
+    });
+
+    // Click the New Account button
+    const newAccountButton = screen.getByText("New Account");
+    await act(async () => {
+      newAccountButton.click();
+    });
+
+    // Verify createAccount was called
+    expect(mockedAccountsService.createAccount).toHaveBeenCalledWith({
+      account_type: "checking",
+      currency: "EUR",
+    });
+  });
+
+  it("handles createAccount errors gracefully", async () => {
+    mockedAccountsService.createAccount.mockRejectedValue(
+      new Error("Create failed"),
+    );
+
+    await act(async () => {
+      render(<Dashboard />);
+    });
+
+    // Wait for initial load
+    await waitFor(() => {
+      expect(screen.getByText("New Account")).toBeInTheDocument();
+    });
+
+    // Click the New Account button
+    const newAccountButton = screen.getByText("New Account");
+    await act(async () => {
+      newAccountButton.click();
+    });
+
+    // Verify createAccount was called
+    expect(mockedAccountsService.createAccount).toHaveBeenCalledWith({
+      account_type: "checking",
+      currency: "EUR",
+    });
   });
 });
