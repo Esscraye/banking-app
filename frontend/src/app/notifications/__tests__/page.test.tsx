@@ -522,8 +522,8 @@ describe("NotificationsPage", () => {
 
     await waitFor(() => {
       // Check that timestamps are displayed - look for any date that contains "2023"
-      // This is more flexible and handles timezone differences
-      const timestamps = screen.getAllByText(/01\/01\/2023.*\d{2}:\d{2}:\d{2}/);
+      // This is more flexible and handles timezone differences and different locale formats
+      const timestamps = screen.getAllByText(/0?1\/0?1\/2023.*\d{1,2}:\d{2}:\d{2}/);
       expect(timestamps.length).toBeGreaterThan(0);
     });
   });
