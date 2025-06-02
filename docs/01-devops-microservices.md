@@ -216,13 +216,6 @@ L'adoption des microservices et du DevOps est souvent complémentaire :
 
 ## Sources et références
 
-### Livres de référence
-1. **"DevOps: A Software Architect's Perspective"** - Len Bass, Ingo Weber, Liming Zhu
-2. **"Building Microservices"** - Sam Newman
-3. **"The DevOps Handbook"** - Gene Kim, Patrick Debois, John Willis, Jez Humble
-4. **"Microservices Patterns"** - Chris Richardson
-5. **"Continuous Delivery"** - Jez Humble, David Farley
-
 ### Articles et ressources en ligne
 1. **Martin Fowler's Microservices Articles** : https://martinfowler.com/microservices/
 2. **The Twelve-Factor App** : https://12factor.net/
@@ -239,10 +232,8 @@ L'adoption des microservices et du DevOps est souvent complémentaire :
 
 ### Standards et frameworks
 1. **ISO 20000** : Gestion des services IT
-2. **ITIL** : Bonnes pratiques pour la gestion des services IT
-3. **DORA Metrics** : Métriques de performance DevOps
-4. **SRE Principles** : Site Reliability Engineering de Google
-5. **OpenAPI Specification** : Spécification pour les APIs REST
+2. **DORA Metrics** : Métriques de performance DevOps
+3. **SRE Principles** : Site Reliability Engineering de Google
 
 ### Outils et plateformes
 1. **Docker** : https://www.docker.com/
@@ -251,8 +242,6 @@ L'adoption des microservices et du DevOps est souvent complémentaire :
 4. **GitHub Actions** : https://github.com/features/actions
 5. **Prometheus** : https://prometheus.io/
 6. **Grafana** : https://grafana.com/
-7. **Terraform** : https://www.terraform.io/
-8. **Ansible** : https://www.ansible.com/
 
 ---
 

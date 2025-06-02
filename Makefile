@@ -158,3 +158,7 @@ backup-db: ## Sauvegarde la base de données
 restore-db: ## Restaure la base de données (usage: make restore-db FILE=backup.sql)
 	@echo "🔄 Restauration de la base de données..."
 	docker exec -i banking-mysql mysql -u banking_user -pbanking_password banking_db < $(FILE)
+
+pdf: ## Génère un PDF de la documentation
+	@echo "📄 Génération du PDF de la documentation..."
+	./scripts/generate-pdf.sh

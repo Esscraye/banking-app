@@ -72,3 +72,4 @@ dist/
 # Temporary files
 tmp/
 temp/
+output/

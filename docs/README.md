@@ -2,6 +2,12 @@
 
 Documentation complète du projet Banking Application - Une architecture microservices moderne avec intégration DevOps.
 
+TP ETE 2025 - Architecture d'Entreprise
+
+- **Co-auteur** : [Léo Baleras](mailto:lbaleras@etu.uqac.ca)
+- **Co-auteur** : [Erwan Vaillant](mailto:evaillant@etu.uqac.ca)
+- **Date** : 2025-01-01
+
 ## 📚 Structure de la Documentation
 
 ### [01. DevOps et Microservices - Théorie](./01-devops-microservices.md)
@@ -86,13 +92,6 @@ graph TB
 2. **Consulter la théorie** : [DevOps et Microservices](./01-devops-microservices.md)
 3. **Comprendre l'architecture** : [Architecture du Projet](./02-architecture-projet.md)
 4. **Analyser les résultats** : [Avantages et Inconvénients](./03-avantages-inconvenients.md)
-
-## 📋 Prérequis pour Comprendre
-
-- Connaissances de base en développement web
-- Familiarité avec Docker et containerisation
-- Notions de bases de données relationnelles
-- Compréhension des API REST
 
 ## 🔧 Technologies Documentées
 
